@@ -1,0 +1,55 @@
+<?php
+//drupal_add_js(drupal_get_path('module', 'flickr') .'/src/jquery.slideShow.min.js', 'file');
+drupal_add_js(drupal_get_path('module', 'flickr') .'/src/flickr.js', 'file');
+
+function flickr_menu() {
+  $items['flickr'] = array(
+    'type' => MENU_NORMAL_ITEM,
+    'title' => t('Flickr'),
+    'description' => 'My custom flickr page',
+    'page callback' => 'flickr_page',
+    'access callback' => 'user_access',
+    'access arguments' => array('access content'),
+  );
+  return $items;
+}
+
+
+function flickr_page() {
+$api_key = '1980470d22445a4458af07be365faf31';
+ 
+$tag = '05_GMC_C7500_Cat_C7';
+$perPage = 25;
+$url = 'https://api.flickr.com/services/rest/?method=flickr.photos.search';
+$url.= '&api_key='.$api_key;
+$url.= '&tags='.$tag;
+$url.= '&per_page='.$perPage;
+$url.= '&format=json';
+$url.= '&nojsoncallback=1';
+
+$response = json_decode(file_get_contents($url));
+$photo_array = $response->photos->photo;
+
+
+$content .= '<div class="slideShow"><ul class = "slides">';
+foreach($photo_array as $single_photo){
+ 
+$farm_id = $single_photo->farm;
+$server_id = $single_photo->server;
+$photo_id = $single_photo->id;
+$secret_id = $single_photo->secret;
+$size = 'c';
+ 
+$title = $single_photo->title;
+ 
+$photo_url = 'https://farm'.$farm_id.'.staticflickr.com/'.$server_id.'/'.$photo_id.'_'.$secret_id.'_'.$size.'.'.'jpg';
+ 
+$content .= '<li class="slide"><img title="'.$title.'" src="'.$photo_url.'" /></li>';
+$content .= "</ul></div>";
+}
+
+//dpm($response);
+  return $content;
+}
+
+
